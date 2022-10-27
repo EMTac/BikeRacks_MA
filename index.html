@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bike Racks in Cambridge, MA</title>
+    <!-- the Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <!-- the Leaflet JavaScript library -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <!-- Link to JQuery Library -->
+  	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Leaflet.markercluster CSS links -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
+    <!-- Leaflet.markercluster JS link -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <!--CSS styles-->
+    <style>
+          body {
+              font-family: sans-serif;
+              color: #142336;
+              max-width: 900px;
+              margin: auto;
+              background-color: #ffffff;
+          }
+    </style>
+  </head>
+
+  <body>
+    <h1>Bike Racks in Cambridge, MA</h1>
+    <div id="mymap" style="height: 88vh"></div>
+    <p>Locations of bike racks in Cambridge, Massachusetts. Data comes from the <a href="https://www.cambridgema.gov/GIS/gisdatadictionary/Recreation/RECREATION_BikeRacks">City of Cambridge</a>. Points can be selected to display capacity (number of available bike spaces) and Status (whether the bike rack is existing or still in the application process).</p>
+    <script>
+      var mymap = L.map('mymap').setView([42.37570338107549, -71.11892014825419], 14);
+      var basemap = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    	maxZoom: 19,
+    	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(mymap);
+    </script>
+    <script>
+      var bikeRack = L.icon({
+    iconUrl: 'bikeIcon.png',
+
+    iconSize:     [50, 50],
+    iconAnchor:   [22, 94],
+    popupAnchor:  [-3, -76]
+});
+      // load bike rack GeoJSON from an external file and add it to the map as a layer
+      $.getJSON("bike.geojson",function(data){
+        var bikeRacks = L.geoJson(data, {
+              pointToLayer: function(feature, latlng){
+            var marker = L.marker(latlng, {icon:bikeRack});
+            marker.bindPopup("Status: " + feature.properties.Status + "<br>Capacity: " + feature.properties.Capacity);
+            return marker;
+      }
+  });
+  var clusters = L.markerClusterGroup({
+    showCoverageOnHover: false,
+  });
+
+  clusters.addLayer(bikeRacks);
+  mymap.addLayer(clusters);
+      });
+    </script>
+  </body>
+</html>
